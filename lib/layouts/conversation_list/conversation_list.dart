@@ -3,8 +3,6 @@ import 'dart:ui';
 
 import 'package:bluebubbles/blocs/chat_bloc.dart';
 import 'package:bluebubbles/layouts/conversation_view/conversation_view.dart';
-import 'package:bluebubbles/layouts/search/search_text_box.dart';
-import 'package:bluebubbles/layouts/search/search_view.dart';
 import 'package:bluebubbles/layouts/widgets/theme_switcher/theme_switcher.dart';
 import 'package:bluebubbles/managers/current_chat.dart';
 import 'package:bluebubbles/managers/event_dispatcher.dart';
@@ -13,14 +11,12 @@ import 'package:bluebubbles/managers/settings_manager.dart';
 import 'package:bluebubbles/managers/theme_manager.dart';
 import 'package:bluebubbles/repository/models/chat.dart';
 import 'package:bluebubbles/repository/models/settings.dart';
-import 'package:bluebubbles/helpers/utils.dart';
 import 'package:device_info/device_info.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import './conversation_tile.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-
 import '../settings/settings_panel.dart';
 
 class ConversationList extends StatefulWidget {
@@ -502,28 +498,27 @@ class __MaterialState extends State<_Material> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            if (selected.length <= 1)
-                              GestureDetector(
-                                onTap: () {
-                                  selected.forEach((element) async {
-                                    element.isMuted = !element.isMuted;
-                                    await element.save(updateLocalVals: true);
-                                  });
-                                  if (this.mounted) setState(() {});
-                                  selected = [];
-                                  setState(() {});
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(
-                                    Icons.notifications_off,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyText1
-                                        .color,
-                                  ),
+                            GestureDetector(
+                              onTap: () {
+                                selected.forEach((element) async {
+                                  element.isMuted = !element.isMuted;
+                                  await element.save(updateLocalVals: true);
+                                });
+                                if (this.mounted) setState(() {});
+                                selected = [];
+                                setState(() {});
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.notifications_off,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      .color,
                                 ),
                               ),
+                            ),
                             GestureDetector(
                               onTap: () {
                                 selected.forEach((element) {
@@ -551,26 +546,44 @@ class __MaterialState extends State<_Material> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                selected.forEach((element) {
-                                  if (element.isPinned) {
-                                    element.unpin();
-                                  } else {
-                                    element.pin();
-                                  }
+                                selected.forEach((element) async {
+                                  element.setUnreadStatus(true);
+                                  ChatBloc().updateChatPosition(element);
+                                  await element.save(updateLocalVals: true);
                                 });
                                 selected = [];
                                 setState(() {});
                               },
                               child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Icon(
-                                    Icons.star,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyText1
-                                        .color,
-                                  ),
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.mark_as_unread,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      .color,
                                 ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                selected.forEach((element) async {
+                                  element.isPinned = !element.isPinned;
+                                  await element.save(updateLocalVals: true);
+                                });
+                                selected = [];
+                                setState(() {});
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Icon(
+                                  Icons.star,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1
+                                      .color,
+                                ),
+                              ),
                             ),
                           ],
                         ),
